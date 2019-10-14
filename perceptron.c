@@ -1,6 +1,18 @@
 #include <stdio.h>
+#include <string.h>
 
+#define array_length(array) (sizeof((array))/sizeof((array)[0]))
 #define learning_rate 1
+
+typedef struct weights{
+    int bias;
+    int w_length;
+    int w[];
+} model_weights;
+
+typedef enum {
+    activation_step_function
+} activation_function_type;
 
 
 /*
@@ -32,8 +44,8 @@ int step_function(int perceptron_output) {
  *
  *   returns: 1 for success
  */
-int perceptron_(int rows, int columns, int dataset[][2], int
-    desired_output[4]) {
+model_weights perceptron_train(int rows, int columns, int dataset[][2], int
+        desired_output[4], int epochs) {
 
     // Variable Initialization
     int weights[columns] = {0}, bias = 0, actual_output = 0, error = 0;
@@ -45,42 +57,84 @@ int perceptron_(int rows, int columns, int dataset[][2], int
      *
      *  A step/threshold function as the activation function.
      */
-    for (int i = 0; i < rows; i++) {
+    for (int repetitions; repetitions <= epochs; repetitions++) {
+        for (int i = 0; i < rows; i++) {
 
-        actual_output = 0;
-        for (int j = 0; j < columns; j++) {
-            actual_output = actual_output + weights[j] * dataset[i][j];
+            actual_output = 0;
+            for (int j = 0; j < columns; j++) {
+                actual_output = actual_output + weights[j] * dataset[i][j];
+            }
+            actual_output = step_function(actual_output + bias);
+
+            error = desired_output[i] - actual_output;
+
+            // Weights Optimization
+            for (int j = 0; j < columns; j++) {
+                weights[j] = weights[j] + learning_rate * error * dataset[i][j];
+            }
+            bias = bias + learning_rate * error * 1;
+
         }
-        actual_output = step_function(actual_output + bias);
+    }
 
-        error = desired_output[i] - actual_output;
+    model_weights w;
+    w.bias = bias;
+    w.w_length = array_length(weights);
+    // Arrays are not directly assignable
+    memcpy(w.w, weights, sizeof(weights));
 
-        // Weights Optimization
-        for (int j = 0; j < columns; j++) {
-            weights[j] = weights[j] + learning_rate * error * dataset[i][j];
-        }
-        bias = bias + learning_rate * error * 1;
+
+    return w;
+}
+
+
+int activation_function(int value, activation_function_type a_f) {
+
+    switch (a_f) {
+        case activation_step_function:
+            return step_function(value);
+        default:
+            break;
     }
 
     return 1;
 }
 
-/*
- * Function: perceptron_train
- * ----------------------------
- *  as perceptron_ with epoch implementation
- *
- */
-int perceptron_train(int rows, int columns, int dataset[][2], int
-    target_values[4], int epochs) {
 
-    for (int i; i <= epochs; i++) {
-        perceptron_(rows, columns, dataset, target_values);
+int perceptron_predict(int x[], model_weights w, activation_function_type
+        a_f) {
+
+    int actual_output = 0;
+
+    for (int i = 0; i < w.w_length; i++) {
+        actual_output = actual_output + x[i] * w.w[i];
     }
+    actual_output = actual_output + w.bias;
+    actual_output = activation_function(actual_output, a_f);
 
-    return 1;
+    return actual_output;
 }
 
 int main(void) {
-    return 1;
+
+    int X[][2] = {
+            {0, 0},
+            {0, 1},
+            {1, 0},
+            {1, 1}
+    };
+
+    int Y[] = {0, 0, 0, 1};
+
+    model_weights test = perceptron_train(4, 2, X, Y, 100);
+    printf("%d", test.bias);
+
+    int x1[] = {1, 1};
+    activation_function_type step_function = step_function;
+
+//
+//    int output = perceptron_predict(Y1, test, step_function);
+
+    getchar();
+    return 3;
 }
