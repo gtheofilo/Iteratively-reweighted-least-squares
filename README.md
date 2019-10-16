@@ -13,7 +13,4 @@ This implementation of the Perceptron algorithm is made in *pure* C. The learnin
 Features to be added:
 1. Variety of activation functions
 2. Variety of cost functions 
-
-https://drive.google.com/file/d/1mpGbX8b6kfNAhNet2yvZR0SGXBsk8svx/view?usp=drivesdk
-https://drive.google.com/file/d/15Bp-mip3_SAJFUJDUTQMWhQzugWhT-wi/view?usp=drivesdk
-https://drive.google.com/file/d/1mpGbX8b6kfNAhNet2yvZR0SGXBsk8svx/view?usp=drivesdk
+3.
