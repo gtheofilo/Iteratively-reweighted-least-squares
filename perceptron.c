@@ -1,16 +1,17 @@
 #include <stdio.h>
 #include <string.h>
+#include <malloc.h>
 
 #define array_length(array) (sizeof((array))/sizeof((array)[0]))
 #define learning_rate 1
 
-typedef struct weights{
+typedef struct model_weights {
     int bias;
     int w_length;
-    int w[];
+    int* w;
 } model_weights;
 
-typedef enum {
+typedef enum activation_function_type {
     activation_step_function
 } activation_function_type;
 
@@ -44,8 +45,8 @@ int step_function(int perceptron_output) {
  *
  *   returns: 1 for success
  */
-model_weights perceptron_train(int rows, int columns, int dataset[][2], int
-        desired_output[4], int epochs) {
+model_weights* perceptron_train(int rows, int columns, int dataset[][2], int
+desired_output[4], int epochs) {
 
     // Variable Initialization
     int weights[columns] = {0}, bias = 0, actual_output = 0, error = 0;
@@ -77,11 +78,14 @@ model_weights perceptron_train(int rows, int columns, int dataset[][2], int
         }
     }
 
-    model_weights w;
-    w.bias = bias;
-    w.w_length = array_length(weights);
+    model_weights* w;
+    w = static_cast<model_weights *>(malloc(sizeof(model_weights)));
+    w->w = (int *)(malloc(array_length(weights) * sizeof(int)));
+    w->bias = bias;
+    w->w_length = array_length(weights);
+
     // Arrays are not directly assignable
-    memcpy(w.w, weights, sizeof(weights));
+    memcpy(w->w, weights, sizeof(weights));
 
 
     return w;
@@ -101,22 +105,22 @@ int activation_function(int value, activation_function_type a_f) {
 }
 
 
-int perceptron_predict(int x[], model_weights w, activation_function_type
-        a_f) {
+int perceptron_predict(int x[], model_weights* w) {
 
     int actual_output = 0;
 
-    for (int i = 0; i < w.w_length; i++) {
-        actual_output = actual_output + x[i] * w.w[i];
+    for (int i = 0; i < w->w_length; i++) {
+        actual_output = actual_output + x[i] * w->w[i];
     }
-    actual_output = actual_output + w.bias;
-    actual_output = activation_function(actual_output, a_f);
+    actual_output = actual_output + w->bias;
+    actual_output = step_function(actual_output);
 
     return actual_output;
 }
 
 int main(void) {
 
+    // Logic AND Table used for training
     int X[][2] = {
             {0, 0},
             {0, 1},
@@ -124,17 +128,23 @@ int main(void) {
             {1, 1}
     };
 
+    // Expected outputs for each pair
     int Y[] = {0, 0, 0, 1};
 
-    model_weights test = perceptron_train(4, 2, X, Y, 100);
-    printf("%d", test.bias);
+    // Table to make new predictions
+    int predictions[2];
 
-    int x1[] = {1, 1};
-    activation_function_type step_function = step_function;
+    model_weights* test;
+    test = perceptron_train(4, 2, X, Y, 100);
 
-//
-//    int output = perceptron_predict(Y1, test, step_function);
+    while (true) {
+        printf("First Digit:");
+        scanf("%d", &predictions[0]);
+        printf("Second Digit:");
+        scanf("%d", &predictions[1]);
+        printf("Output: %d\n", perceptron_predict(predictions, test));
+        printf("--------------------\n");
+    }
 
-    getchar();
     return 3;
 }
