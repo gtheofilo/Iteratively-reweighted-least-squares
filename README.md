@@ -1,4 +1,4 @@
-# MyPeceptron
+# Iteratively reweighted least squares
 
 <p align="center">
   <img height="400" src="https://i.imgur.com/xPR2kpo.gif">
